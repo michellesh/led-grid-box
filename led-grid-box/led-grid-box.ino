@@ -44,6 +44,10 @@ void loop() {
   showNumber(2, 3);
   showNumber(3, 4);
   showColon(CRGB::Blue);
+
+  //flipHorizontal();
+  //flipVertical();
+
   FastLED.show();
 
   delay(100);
