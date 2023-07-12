@@ -1,7 +1,7 @@
+#include "Numbers.h"
 #include <FastLED.h>
 #include <LEDMatrix.h>
 #include <LEDText.h>
-#include "Numbers.h"
 
 #define BUTTON_PIN 2
 #define LED_PIN 3
@@ -10,7 +10,7 @@
 #define WIDTH 16
 #define HEIGHT 5
 #define NUM_LEDS (WIDTH * HEIGHT)
-#define COLON_Y 8
+#define COLON_COLUMN 8
 
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
@@ -19,12 +19,13 @@ void setup() {
   delay(500);
 
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
-  FastLED.setBrightness(BRIGHTNESS);
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
 
 void loop() {
+  FastLED.clear();
+
   int buttonRead = digitalRead(BUTTON_PIN); // LOW when button held
   if (buttonRead == LOW) {
     Serial.println("ON");
@@ -32,45 +33,39 @@ void loop() {
     Serial.println("OFF");
   }
 
-  //for (int x = 0; x < WIDTH; x++) {
-  //  for (int y = 0; y < HEIGHT; y++) {
-  //    int hue = map(y, 0, HEIGHT, 0, 255);
-  //    leds(x, y) = CHSV(hue, 255, 255);
-  //  }
-  //}
+  showTime(1, 2, 3, 4);
 
-  showNumber(0, 1);
-  showNumber(1, 2);
-  showNumber(2, 3);
-  showNumber(3, 4);
-  showColon(CRGB::Blue);
+  // flipHorizontal();
+  // flipVertical();
 
-  //flipHorizontal();
-  //flipVertical();
-
+  FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
 
   delay(100);
 }
 
-void showColon(CRGB color) {
-  leds(COLON_Y, 0) = CRGB::Black;
-  leds(COLON_Y, 1) = color;
-  leds(COLON_Y, 2) = CRGB::Black;
-  leds(COLON_Y, 3) = color;
-  leds(COLON_Y, 4) = CRGB::Black;
+void showTime(int d1, int d2, int d3, int d4) {
+  showDigit(digits[d1], 0);
+  showDigit(digits[d2], 4);
+  showColon();
+  showDigit(digits[d3], 9);
+  showDigit(digits[d4], 13);
 }
 
+void showColon() {
+  leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
+  leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
+}
 
-void showNumber(int xPosition, int digit) {
-  int xStart = xPosition * 4;
-  xStart = xStart >= COLON_Y ? xStart + 1 : xStart;
-  for (int x = 0; x < 3; x++) {
-    for (int y = 0; y < 5; y++) {
-      if (digits[digit].pixels[y][x]) {
-        leds(xStart + x, y) = CRGB::White;
+void showDigit(Digit digit, int startColumn) {
+  for (int x = 0; x < DIGIT_WIDTH; x++) {
+    for (int y = 0; y < DIGIT_HEIGHT; y++) {
+      if (digit.pixels[y][x]) {
+        int hue = map(startColumn + x, 0, WIDTH, 0, 255);
+        CHSV color = CHSV(hue, 255, BRIGHTNESS);
+        leds(startColumn + x, y) = color;
       } else {
-        leds(xStart + x, y) = CRGB::Black;
+        leds(startColumn + x, y) = CRGB::Black;
       }
     }
   }

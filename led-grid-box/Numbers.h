@@ -1,3 +1,6 @@
+#define DIGIT_WIDTH 3  // Each digit is 3 pixels across
+#define DIGIT_HEIGHT 5  // Each digit is 5 pixels high
+
 struct Digit {
   bool pixels[5][3];
 };
