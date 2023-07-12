@@ -14,10 +14,9 @@
 
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
-long startMillis;
-
+long startMicros;
 int startHour = 6;
-int startMinute = 27;
+int startMinute = 38;
 
 void setup() {
   Serial.begin(115200);
@@ -27,7 +26,7 @@ void setup() {
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  startMillis = millis();
+  startMicros = micros();
 }
 
 void loop() {
@@ -40,8 +39,8 @@ void loop() {
     Serial.println("OFF");
   }
 
-  long millisSinceStart = millis() - startMillis;
-  int secondsSinceStart = millisSinceStart / 1000;
+  unsigned long microsSinceStart = micros() - startMicros;
+  int secondsSinceStart = microsSinceStart / 1000000;
   int minutesSinceStart = secondsSinceStart / 60;
   int hoursSinceStart = minutesSinceStart / 60;
 
