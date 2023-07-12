@@ -53,8 +53,19 @@ void showTime(int d1, int d2, int d3, int d4) {
 }
 
 void showColon() {
-  leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
-  leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
+  static bool colonOn = true;
+  long now = millis();
+  static long change = now + 1000;
+
+  if (now > change) {
+    change = now + 1000;
+    colonOn = !colonOn;
+  }
+
+  if (colonOn) {
+    leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
+    leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
+  }
 }
 
 void showDigit(Digit digit, int startColumn) {
