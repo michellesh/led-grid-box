@@ -14,6 +14,11 @@
 
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
+long startMillis;
+
+int startHour = 6;
+int startMinute = 27;
+
 void setup() {
   Serial.begin(115200);
   delay(500);
@@ -21,6 +26,8 @@ void setup() {
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  startMillis = millis();
 }
 
 void loop() {
@@ -33,7 +40,16 @@ void loop() {
     Serial.println("OFF");
   }
 
-  showTime(1, 2, 3, 4);
+  long millisSinceStart = millis() - startMillis;
+  int secondsSinceStart = millisSinceStart / 1000;
+  int minutesSinceStart = secondsSinceStart / 60;
+  int hoursSinceStart = minutesSinceStart / 60;
+
+  int hour = (startHour + hoursSinceStart) % 60;
+  int minute = (startMinute + minutesSinceStart) % 60;
+
+  //showTime(1, 2, 3, 4);
+  showTime(hour / 10, hour % 10, minute / 10, minute % 10);
 
   // flipHorizontal();
   // flipVertical();
@@ -45,7 +61,7 @@ void loop() {
 }
 
 void showTime(int d1, int d2, int d3, int d4) {
-  showDigit(digits[d1], 0);
+  if (d1 != 0) { showDigit(digits[d1], 0); }
   showDigit(digits[d2], 4);
   showColon();
   showDigit(digits[d3], 9);
