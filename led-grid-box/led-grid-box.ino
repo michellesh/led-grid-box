@@ -14,10 +14,6 @@
 
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
-long startMicros;
-int startHour = 6;
-int startMinute = 38;
-
 void setup() {
   Serial.begin(115200);
   delay(500);
@@ -25,42 +21,75 @@ void setup() {
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-  startMicros = micros();
 }
 
 void loop() {
+  unsigned long startMillis = millis();
+
   FastLED.clear();
 
+  // Test read button state
   int buttonRead = digitalRead(BUTTON_PIN); // LOW when button held
   if (buttonRead == LOW) {
-    Serial.println("ON");
+    // Serial.println("ON");
   } else {
-    Serial.println("OFF");
+    // Serial.println("OFF");
   }
 
-  unsigned long microsSinceStart = micros() - startMicros;
-  int secondsSinceStart = microsSinceStart / 1000000;
-  int minutesSinceStart = secondsSinceStart / 60;
-  int hoursSinceStart = minutesSinceStart / 60;
+  static long hour = 14;
+  static long minute = 40;
+  static long second = 0;
 
-  int hour = (startHour + hoursSinceStart) % 60;
-  int minute = (startMinute + minutesSinceStart) % 60;
+  second++;
+  if (second > 59) {
+    second = 0;
+    minute++;
+    if (minute > 59) {
+      minute = 0;
+      hour++;
+      if (hour > 23) {
+        hour = 0;
+      }
+    }
+  }
 
-  //showTime(1, 2, 3, 4);
-  showTime(hour / 10, hour % 10, minute / 10, minute % 10);
+  int h = convert24To12Hour(hour);
+  showTime(h / 10, h % 10, minute / 10, minute % 10);
 
   // flipHorizontal();
-  // flipVertical();
+  flipVertical();
 
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
 
-  delay(100);
+  delay(1000 - getAvgLoopTime(startMillis));
+}
+
+int getAvgLoopTime(unsigned long startMillis) {
+  static unsigned long sum = 0;
+  static unsigned long count = 0;
+  unsigned long endMillis = millis();
+
+  count++;
+  sum += endMillis - startMillis;
+  float avgLoopTime = (float)sum / (float)count;
+  Serial.println(endMillis - startMillis);
+  Serial.println(avgLoopTime);
+  Serial.println(round(avgLoopTime));
+  Serial.println();
+
+  return round(avgLoopTime);
+}
+
+int convert24To12Hour(int hour24) {
+  int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
+  return hour12 == 0 ? 12 : hour12;
 }
 
 void showTime(int d1, int d2, int d3, int d4) {
-  if (d1 != 0) { showDigit(digits[d1], 0); }
+  if (d1 != 0) {
+    showDigit(digits[d1], 0);
+  }
   showDigit(digits[d2], 4);
   showColon();
   showDigit(digits[d3], 9);
