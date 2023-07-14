@@ -1,9 +1,10 @@
 #include "Numbers.h"
+#include <ESP32Time.h>
 #include <FastLED.h>
 #include <LEDMatrix.h>
 
-#define BUTTON_PIN 2
-#define LED_PIN 3
+#define BUTTON_PIN 21
+#define LED_PIN 13
 #define BRIGHTNESS 100
 
 #define WIDTH 16
@@ -13,48 +14,36 @@
 
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
+ESP32Time rtc;
+
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(500);
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
 
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  // rtc.setTime(s, min, hr, day, month, year)
+  rtc.setTime(0, 34, 13, 14, 7, 2023);
 }
 
 void loop() {
-  unsigned long startMicros = micros();
-
   FastLED.clear();
 
   // Test read button state
   int buttonRead = digitalRead(BUTTON_PIN); // LOW when button held
   if (buttonRead == LOW) {
-    // Serial.println("ON");
+    Serial.println("ON");
   } else {
-    // Serial.println("OFF");
+    Serial.println("OFF");
   }
 
-  static long hour = 12;
-  static long minute = 16;
-  static long second = 0;
+  int hour = rtc.getHour();
+  int minute = rtc.getMinute();
+  showTime(hour / 10, hour % 10, minute / 10, minute % 10);
 
-  second++;
-  if (second > 59) {
-    second = 0;
-    minute++;
-    if (minute > 59) {
-      minute = 0;
-      hour++;
-      if (hour > 23) {
-        hour = 0;
-      }
-    }
-  }
-
-  int h = convert24To12Hour(hour);
-  //showTime(h / 10, h % 10, minute / 10, minute % 10);
-  showTime(minute / 10, minute % 10, second / 10, second % 10);
+  Serial.println(rtc.getTime("%H:%M:%S"));
 
   // flipHorizontal();
   flipVertical();
@@ -62,17 +51,7 @@ void loop() {
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
 
-  unsigned long loopTime = micros() - startMicros;
-  loopTime /= 1000;
-  Serial.print("loopTime: ");
-  Serial.println(loopTime);
-  delay(1000 - loopTime);
-  //delay(996);
-}
-
-int convert24To12Hour(int hour24) {
-  int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
-  return hour12 == 0 ? 12 : hour12;
+  delay(1000);
 }
 
 void showTime(int d1, int d2, int d3, int d4) {
