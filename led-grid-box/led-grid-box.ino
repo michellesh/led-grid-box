@@ -23,7 +23,7 @@ void setup() {
 }
 
 void loop() {
-  unsigned long startMillis = millis();
+  unsigned long startMicros = micros();
 
   FastLED.clear();
 
@@ -35,8 +35,8 @@ void loop() {
     // Serial.println("OFF");
   }
 
-  static long hour = 10;
-  static long minute = 9;
+  static long hour = 12;
+  static long minute = 16;
   static long second = 0;
 
   second++;
@@ -53,7 +53,8 @@ void loop() {
   }
 
   int h = convert24To12Hour(hour);
-  showTime(h / 10, h % 10, minute / 10, minute % 10);
+  //showTime(h / 10, h % 10, minute / 10, minute % 10);
+  showTime(minute / 10, minute % 10, second / 10, second % 10);
 
   // flipHorizontal();
   flipVertical();
@@ -61,23 +62,12 @@ void loop() {
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
 
-  delay(1000 - getAvgLoopTime(startMillis));
-}
-
-int getAvgLoopTime(unsigned long startMillis) {
-  static unsigned long sum = 0;
-  static unsigned long count = 0;
-  unsigned long endMillis = millis();
-
-  count++;
-  sum += endMillis - startMillis;
-  float avgLoopTime = (float)sum / (float)count;
-  Serial.println(endMillis - startMillis);
-  Serial.println(avgLoopTime);
-  Serial.println(round(avgLoopTime));
-  Serial.println();
-
-  return round(avgLoopTime);
+  unsigned long loopTime = micros() - startMicros;
+  loopTime /= 1000;
+  Serial.print("loopTime: ");
+  Serial.println(loopTime);
+  delay(1000 - loopTime);
+  //delay(996);
 }
 
 int convert24To12Hour(int hour24) {
