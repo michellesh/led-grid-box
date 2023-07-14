@@ -1,7 +1,7 @@
 #include "Numbers.h"
 #include <FastLED.h>
 #include <LEDMatrix.h>
-#include <LEDText.h>
+#include <TimeLib.h>
 
 #define BUTTON_PIN 2
 #define LED_PIN 3
@@ -21,11 +21,11 @@ void setup() {
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  setTime(18, 24, 0, 8, 11, 2023);
 }
 
 void loop() {
-  unsigned long startMillis = millis();
-
   FastLED.clear();
 
   // Test read button state
@@ -36,25 +36,8 @@ void loop() {
     // Serial.println("OFF");
   }
 
-  static long hour = 14;
-  static long minute = 40;
-  static long second = 0;
-
-  second++;
-  if (second > 59) {
-    second = 0;
-    minute++;
-    if (minute > 59) {
-      minute = 0;
-      hour++;
-      if (hour > 23) {
-        hour = 0;
-      }
-    }
-  }
-
-  int h = convert24To12Hour(hour);
-  showTime(h / 10, h % 10, minute / 10, minute % 10);
+  int hour = hourFormat12();
+  showTime(hour / 10, hour % 10, minute() / 10, minute() % 10);
 
   // flipHorizontal();
   flipVertical();
@@ -62,28 +45,7 @@ void loop() {
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
 
-  delay(1000 - getAvgLoopTime(startMillis));
-}
-
-int getAvgLoopTime(unsigned long startMillis) {
-  static unsigned long sum = 0;
-  static unsigned long count = 0;
-  unsigned long endMillis = millis();
-
-  count++;
-  sum += endMillis - startMillis;
-  float avgLoopTime = (float)sum / (float)count;
-  Serial.println(endMillis - startMillis);
-  Serial.println(avgLoopTime);
-  Serial.println(round(avgLoopTime));
-  Serial.println();
-
-  return round(avgLoopTime);
-}
-
-int convert24To12Hour(int hour24) {
-  int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
-  return hour12 == 0 ? 12 : hour12;
+  delay(1000);
 }
 
 void showTime(int d1, int d2, int d3, int d4) {
@@ -98,14 +60,7 @@ void showTime(int d1, int d2, int d3, int d4) {
 
 void showColon() {
   static bool colonOn = true;
-  long now = millis();
-  static long change = now + 1000;
-
-  if (now > change) {
-    change = now + 1000;
-    colonOn = !colonOn;
-  }
-
+  colonOn = !colonOn;
   if (colonOn) {
     leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
     leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
