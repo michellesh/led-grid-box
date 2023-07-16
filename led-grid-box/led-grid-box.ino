@@ -1,9 +1,15 @@
+// clang-format off
+#include "Timer.h"
+#include "Button.h"
 #include "Numbers.h"
+#include <EEPROM.h>
 #include <ESP32Time.h>
 #include <FastLED.h>
 #include <LEDMatrix.h>
+// clang-format on
 
-#define BUTTON_PIN 21
+#define EEPROM_SIZE 3
+#define BUTTON_PIN 15
 #define LED_PIN 13
 #define BRIGHTNESS 100
 
@@ -12,46 +18,80 @@
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define COLON_COLUMN 8
 
+#define EEPROM_HOUR 0
+#define EEPROM_MINUTE 1
+#define EEPROM_SECOND 2
+
+#define DAY 11
+#define MONTH 8
+#define YEAR 2023
+
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
 ESP32Time rtc;
+
+Button button(BUTTON_PIN);
 
 void setup() {
   Serial.begin(115200);
   delay(500);
 
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  button.setupButton();
 
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
 
-  // rtc.setTime(s, min, hr, day, month, year)
-  rtc.setTime(0, 34, 13, 14, 7, 2023);
+  EEPROM.begin(EEPROM_SIZE);
+
+  // Read values from EEPROM
+  int hour = EEPROM.read(EEPROM_HOUR);
+  int minute = EEPROM.read(EEPROM_MINUTE);
+  int second = EEPROM.read(EEPROM_SECOND);
+
+  rtc.setTime(second, minute, hour, DAY, MONTH, YEAR);
 }
 
 void loop() {
   FastLED.clear();
 
-  // Test read button state
-  int buttonRead = digitalRead(BUTTON_PIN); // LOW when button held
-  if (buttonRead == LOW) {
-    Serial.println("ON");
-  } else {
-    Serial.println("OFF");
+  readButtonState();
+
+  int hour = rtc.getHour(true);
+  int minute = rtc.getMinute();
+
+  EVERY_N_SECONDS(1) {
+    Serial.println(rtc.getTime("%H:%M:%S"));
+    // Save values in EEPROM. Will only be commited if values have changed.
+    EEPROM.write(EEPROM_HOUR, hour);
+    EEPROM.write(EEPROM_MINUTE, minute);
+    EEPROM.write(EEPROM_SECOND, rtc.getSecond());
+    EEPROM.commit();
   }
 
-  int hour = rtc.getHour();
-  int minute = rtc.getMinute();
+  hour = getHour12(hour);
   showTime(hour / 10, hour % 10, minute / 10, minute % 10);
 
-  Serial.println(rtc.getTime("%H:%M:%S"));
-
-  // flipHorizontal();
-  flipVertical();
+  flipHorizontal();
+  // flipVertical();
 
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
 
-  delay(1000);
+  // delay(1000);
+}
+
+void readButtonState() {
+  button.readState();
+  if (button.clicked()) {
+    Serial.println("clicked!");
+  }
+  if (button.longPressed()) {
+    Serial.println("long pressed!");
+  }
+}
+
+int getHour12(int hour24) {
+  int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
+  return hour12 == 0 ? 12 : hour12;
 }
 
 void showTime(int d1, int d2, int d3, int d4) {
@@ -66,7 +106,7 @@ void showTime(int d1, int d2, int d3, int d4) {
 
 void showColon() {
   static bool colonOn = true;
-  colonOn = !colonOn;
+  EVERY_N_SECONDS(1) { colonOn = !colonOn; }
   if (colonOn) {
     leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
     leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
@@ -77,7 +117,7 @@ void showDigit(Digit digit, int startColumn) {
   for (int x = 0; x < DIGIT_WIDTH; x++) {
     for (int y = 0; y < DIGIT_HEIGHT; y++) {
       if (digit.pixels[y][x]) {
-        int hue = map(startColumn + x, 0, WIDTH, 0, 255);
+        int hue = map(startColumn + x, 0, WIDTH, 255, 0);
         CHSV color = CHSV(hue, 255, BRIGHTNESS);
         leds(startColumn + x, y) = color;
       } else {
