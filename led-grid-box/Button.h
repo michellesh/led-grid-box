@@ -6,6 +6,7 @@ private:
   int _pin;
   bool _clicked = false;
   bool _longPressed = false;
+  bool _longPressMode = false;
   int _prevState = BUTTON_UP;
   Timer _longPressTimer = {LONG_PRESS_DURATION};
 
@@ -24,11 +25,13 @@ public:
 
     if (state == BUTTON_DOWN && _prevState == BUTTON_UP) {
       _longPressTimer.reset();
-    }
-
-    if (state == BUTTON_UP && _prevState == BUTTON_DOWN) {
-      if (_longPressTimer.complete()) {
-        _longPressed = true;
+    } else if (state == BUTTON_DOWN && _longPressTimer.complete()) {
+      _longPressed = true;
+      _longPressMode = true;
+      _longPressTimer.reset();
+    } else if (state == BUTTON_UP && _prevState == BUTTON_DOWN) {
+      if (_longPressMode) {
+        _longPressMode = false;
       } else {
         _clicked = true;
       }

@@ -1,3 +1,8 @@
+int getHour12(int hour24) {
+  int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
+  return hour12 == 0 ? 12 : hour12;
+}
+
 void flipHorizontal() {
   swapRows(0, 4);
   swapRows(1, 3);

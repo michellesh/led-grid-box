@@ -26,11 +26,30 @@
 #define MONTH 8
 #define YEAR 2023
 
+#define SHOW_TIME 0
+#define SET_HOUR 1
+#define SET_MINUTE_DIGIT_1 2
+#define SET_MINUTE_DIGIT_2 3
+#define NUM_MODES 4
+
+#define SET_TIME_FLASH_DURATION                                                \
+  300 // How many millseconds per flash when setting time
+#define COLON_FLASH_DURATION 1000 // How many milliseconds per colon flash
+
 cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
 
 ESP32Time rtc;
 
 Button button(BUTTON_PIN);
+
+int mode = SHOW_TIME;
+bool hourDigitVisible = true;
+bool minuteDigit1Visible = true;
+bool minuteDigit2Visible = true;
+
+int hour = 0;
+int minute = 0;
+int second = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -43,9 +62,9 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE);
 
   // Read values from EEPROM
-  int hour = EEPROM.read(EEPROM_HOUR);
-  int minute = EEPROM.read(EEPROM_MINUTE);
-  int second = EEPROM.read(EEPROM_SECOND);
+  hour = EEPROM.read(EEPROM_HOUR);
+  minute = EEPROM.read(EEPROM_MINUTE);
+  second = EEPROM.read(EEPROM_SECOND);
 
   rtc.setTime(second, minute, hour, DAY, MONTH, YEAR);
 }
@@ -55,58 +74,108 @@ void loop() {
 
   readButtonState();
 
-  int hour = rtc.getHour(true);
-  int minute = rtc.getMinute();
+  updateEEPROM();
 
-  EVERY_N_SECONDS(1) {
-    Serial.println(rtc.getTime("%H:%M:%S"));
-    // Save values in EEPROM. Will only be commited if values have changed.
-    EEPROM.write(EEPROM_HOUR, hour);
-    EEPROM.write(EEPROM_MINUTE, minute);
-    EEPROM.write(EEPROM_SECOND, rtc.getSecond());
-    EEPROM.commit();
+  EVERY_N_MILLISECONDS(SET_TIME_FLASH_DURATION) {
+    if (mode == SHOW_TIME) {
+      hourDigitVisible = true;
+      minuteDigit1Visible = true;
+      minuteDigit2Visible = true;
+    } else if (mode == SET_HOUR) {
+      hourDigitVisible = !hourDigitVisible;
+      minuteDigit1Visible = true;
+      minuteDigit2Visible = true;
+    } else if (mode == SET_MINUTE_DIGIT_1) {
+      hourDigitVisible = true;
+      minuteDigit1Visible = !minuteDigit1Visible;
+      minuteDigit2Visible = true;
+    } else if (mode == SET_MINUTE_DIGIT_2) {
+      hourDigitVisible = true;
+      minuteDigit1Visible = true;
+      minuteDigit2Visible = !minuteDigit2Visible;
+    }
   }
 
-  hour = getHour12(hour);
-  showTime(hour / 10, hour % 10, minute / 10, minute % 10);
+  if (mode == SHOW_TIME) {
+    hour = rtc.getHour(true);
+    minute = rtc.getMinute();
+  }
+
+  int hour12 = getHour12(hour); // Convert 24-hour time to 12-hour time
+  showTime(hour12 / 10, hour12 % 10, minute / 10, minute % 10);
 
   flipHorizontal();
   // flipVertical();
 
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.show();
-
-  // delay(1000);
 }
 
 void readButtonState() {
   button.readState();
   if (button.clicked()) {
-    Serial.println("clicked!");
+    Serial.println("click!");
+    if (mode == SET_HOUR) {
+      hour++;
+      hour %= 24;
+    } else if (mode == SET_MINUTE_DIGIT_1) {
+      minute += 10;
+      minute %= 60;
+    } else if (mode == SET_MINUTE_DIGIT_2) {
+      minute++;
+      if (minute % 10 == 0) {
+        minute -= 10;
+      }
+      minute %= 60;
+    }
+    rtc.setTime(0, minute, hour, DAY, MONTH, YEAR);
   }
   if (button.longPressed()) {
-    Serial.println("long pressed!");
+    Serial.println("long press!");
+    mode = (mode + 1) % NUM_MODES; // Increment mode
   }
 }
 
-int getHour12(int hour24) {
-  int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
-  return hour12 == 0 ? 12 : hour12;
+void updateEEPROM() {
+  EVERY_N_SECONDS(1) {
+    // Save values in EEPROM. Will only be commited if values have changed.
+    EEPROM.write(EEPROM_HOUR, rtc.getHour(true));
+    EEPROM.write(EEPROM_MINUTE, rtc.getMinute());
+    EEPROM.write(EEPROM_SECOND, rtc.getSecond());
+    EEPROM.commit();
+    Serial.println(rtc.getTime("%H:%M:%S"));
+  }
 }
 
-void showTime(int d1, int d2, int d3, int d4) {
-  if (d1 != 0) {
-    showDigit(digits[d1], 0);
+void showTime(int hourDigit1, int hourDigit2, int minuteDigit1,
+              int minuteDigit2) {
+  if (hourDigit1 != 0 && hourDigitVisible) {
+    showDigit(digits[hourDigit1], 0);
   }
-  showDigit(digits[d2], 4);
+  if (hourDigitVisible) {
+    showDigit(digits[hourDigit2], 4);
+  }
+  if (minuteDigit1Visible) {
+    showDigit(digits[minuteDigit1], 9);
+  }
+  if (minuteDigit2Visible) {
+    showDigit(digits[minuteDigit2], 13);
+  }
   showColon();
-  showDigit(digits[d3], 9);
-  showDigit(digits[d4], 13);
 }
 
 void showColon() {
   static bool colonOn = true;
-  EVERY_N_SECONDS(1) { colonOn = !colonOn; }
+  EVERY_N_MILLISECONDS(COLON_FLASH_DURATION) {
+    if (mode == SHOW_TIME) {
+      colonOn = !colonOn;
+    }
+  }
+  EVERY_N_MILLISECONDS(SET_TIME_FLASH_DURATION) {
+    if (mode != SHOW_TIME) {
+      colonOn = !colonOn;
+    }
+  }
   if (colonOn) {
     leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
     leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
