@@ -18,30 +18,15 @@ void updateTime() {
 }
 
 void flashDigits() {
-  EVERY_N_MILLISECONDS(EDIT_TIME_FLASH_DURATION) {
-    // Toggle the visibility of the digit depending on the current mode
-    switch (c.mode) {
-    case EDIT_HOUR:
-      c.hideHourDigit = !c.hideHourDigit;
-      c.hideMinuteDigit1 = false;
-      c.hideMinuteDigit2 = false;
-      break;
-    case EDIT_MINUTE_DIGIT_1:
-      c.hideHourDigit = false;
-      c.hideMinuteDigit1 = !c.hideMinuteDigit1;
-      c.hideMinuteDigit2 = false;
-      break;
-    case EDIT_MINUTE_DIGIT_2:
-      c.hideHourDigit = false;
-      c.hideMinuteDigit1 = false;
-      c.hideMinuteDigit2 = !c.hideMinuteDigit2;
-      break;
-    default: // SHOW_TIME mode, show all digits
-      c.hideHourDigit = false;
-      c.hideMinuteDigit1 = false;
-      c.hideMinuteDigit2 = false;
-      break;
+  if (c.mode != SHOW_TIME) {
+    // If setting the clock, flash the digit being edited every 300ms
+    EVERY_N_MILLISECONDS(EDIT_TIME_FLASH_DURATION) {
+      c.hideDigit = !c.hideDigit;
+      c.hideColon = c.hideDigit;
     }
+  } else {
+    // If in SHOW_TIME mode, flash the colon every second
+    EVERY_N_MILLISECONDS(COLON_FLASH_DURATION) { c.hideColon = !c.hideColon; }
   }
 }
 

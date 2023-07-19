@@ -54,7 +54,7 @@ ESP32Time rtc;
 
 Button button(BUTTON_PIN);
 
-Clock c = {SHOW_TIME, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+Clock c;
 
 void setup() {
   Serial.begin(115200);

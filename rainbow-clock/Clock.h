@@ -12,9 +12,10 @@ struct Clock {
   int minuteDigit2; // the right minute digit
 
   // When setting the clock, the digit you're currently setting flashes on and
-  // off. These variables keep track of whether a digit is currently visible or
-  // hidden.
-  bool hideHourDigit;
-  bool hideMinuteDigit1;
-  bool hideMinuteDigit2;
+  // off. `hideDigit` tracks whether the digit being edited is currently hidden
+  bool hideDigit;
+
+  // The colon always flashes every second, unless you're setting the time, it
+  // flashes along with the digit being edited
+  bool hideColon;
 };

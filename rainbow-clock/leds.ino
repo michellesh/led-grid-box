@@ -9,16 +9,16 @@ void setClockLEDs() {
   // not currently flashing in edit mode)
 
   // Also hide the left hour digit if it's zero, ie. show 5:00 instead of 05:00
-  if (!c.hideHourDigit && c.hourDigit1 != 0) {
+  if (c.hourDigit1 != 0 && (c.mode != EDIT_HOUR || !c.hideDigit)) {
     setDigitLEDs(c.hourDigit1, DIGIT_1_COLUMN);
   }
-  if (!c.hideHourDigit) {
+  if (c.mode != EDIT_HOUR || !c.hideDigit) {
     setDigitLEDs(c.hourDigit2, DIGIT_2_COLUMN);
   }
-  if (!c.hideMinuteDigit1) {
+  if (c.mode != EDIT_MINUTE_DIGIT_1 || !c.hideDigit) {
     setDigitLEDs(c.minuteDigit1, DIGIT_3_COLUMN);
   }
-  if (!c.hideMinuteDigit2) {
+  if (c.mode != EDIT_MINUTE_DIGIT_2 || !c.hideDigit) {
     setDigitLEDs(c.minuteDigit2, DIGIT_4_COLUMN);
   }
   setColonLEDs();
@@ -49,26 +49,8 @@ CHSV getColor(int column) {
 }
 
 void setColonLEDs() {
-  // The colon always flashes every second, unless you're setting the time, it
-  // flashes quicker
-  static bool hideColon = false;
-
-  // If in SHOW_TIME mode, flash the colon every second
-  EVERY_N_MILLISECONDS(COLON_FLASH_DURATION) {
-    if (c.mode == SHOW_TIME) {
-      hideColon = !hideColon;
-    }
-  }
-
-  // If setting the clock, flash the colon quicker, every 300 ms
-  EVERY_N_MILLISECONDS(EDIT_TIME_FLASH_DURATION) {
-    if (c.mode != SHOW_TIME) {
-      hideColon = !hideColon;
-    }
-  }
-
   // If the colon is flashed on, show the colon LEDs
-  if (!hideColon) {
+  if (!c.hideColon) {
     leds(COLON_COLUMN, 1) = CHSV(0, 0, BRIGHTNESS); // White
     leds(COLON_COLUMN, 3) = CHSV(0, 0, BRIGHTNESS); // White
   }
