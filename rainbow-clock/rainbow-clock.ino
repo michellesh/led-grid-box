@@ -94,9 +94,9 @@ void loop() {
   // Since this grid was originally a 16x16 grid that was cut into three 5x16
   // sub-grids, some of the sub-grids have different starting points and
   // different arrangements of LEDs. The back of the grid should have a label
-  // indiciating the LED arrangement and if you need to call flipHorizontal or
-  // flipVertical.
-  flipHorizontal();
+  // indiciating the LED arrangement and if you need to call `flipVertical`
+  // Alternatively you can figure out which type of grid you have here:
+  // https://github.com/michellesh/rainbow-clock/wiki/LED-grid-layout
   flipVertical();
 
   // Tell the FastLED library to show your data

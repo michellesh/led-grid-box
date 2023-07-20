@@ -56,17 +56,10 @@ void setColonLEDs() {
   }
 }
 
-void flipHorizontal() {
+void flipVertical() {
   swapRows(0, 4); // Swap the first row and last row
   swapRows(1, 3); // Swap the second row and second-to-last row
   // The middle row stays the same
-}
-
-void flipVertical() {
-  // For every column 0 -> 7, swap with it's mirroring column 15 -> 8
-  for (int i = 0; i < WIDTH / 2; i++) {
-    swapColumns(i, WIDTH - i - 1);
-  }
 }
 
 void swapRows(int y1, int y2) {
@@ -82,22 +75,5 @@ void swapRows(int y1, int y2) {
   // Fill the second row with first row values from the temp variable
   for (int x = 0; x < WIDTH; x++) {
     leds(x, y2) = tempRow[x];
-  }
-}
-
-void swapColumns(int x1, int x2) {
-  // Store the first column values in a temporary variable
-  CRGB tempColumn[HEIGHT];
-  for (int y = 0; y < HEIGHT; y++) {
-    tempColumn[y] = leds(x1, y);
-  }
-  // Fill the first column with the second column values
-  for (int y = 0; y < HEIGHT; y++) {
-    leds(x1, y) = leds(x2, y);
-  }
-  // Fill the second column with first column values from the temp variable
-  flashDigits();
-  for (int y = 0; y < HEIGHT; y++) {
-    leds(x2, y) = tempColumn[y];
   }
 }
