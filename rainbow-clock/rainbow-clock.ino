@@ -3,16 +3,16 @@
  * https://github.com/michellesh/rainbow-clock
  */
 
-// Libraries defined here
-#include "Button.h"
-#include "Clock.h"
-#include "DigitPixels.h"
-
 // External libraries
 #include <EEPROM.h>    // Built in
 #include <ESP32Time.h> // Arduino libraries manager
 #include <FastLED.h>   // Arduino libraries manager
-#include <LEDMatrix.h> // https://github.com/AaronLiddiment/LEDMatrix
+
+// Internal includes
+#include "Button.h"
+#include "Clock.h"
+#include "DigitPixels.h"
+#include "LEDGrid.h"
 
 // LED variables
 #define LED_PIN 13                // pin D13 on the ESP32
@@ -20,6 +20,13 @@
 #define WIDTH 16                  // number of pixels across
 #define HEIGHT 5                  // number of pixels high
 #define NUM_LEDS (WIDTH * HEIGHT) // total number of pixels
+
+// Since this grid was originally a 16x16 grid that was cut into three 5x16
+// sub-grids, one of the sub-grids has a different starting point and
+// different arrangement of LEDs. The back of the grid should have a label
+// indicating the LED arrangement, or you can figure out which type of grid you
+// have here: https://github.com/michellesh/rainbow-clock/wiki/LED-grid-layout
+#define SUBGRID_TYPE 3
 
 // Clock variables
 // (The RTC library requires both time and date. Since the clock only tracks
@@ -48,7 +55,7 @@
 #define EDIT_TIME_FLASH_DURATION 300 // millseconds per flash when setting time
 #define COLON_FLASH_DURATION 1000    // milliseconds per colon flash
 
-cLEDMatrix<WIDTH, HEIGHT, HORIZONTAL_ZIGZAG_MATRIX> leds;
+LEDGrid leds(WIDTH, HEIGHT, SUBGRID_TYPE);
 
 ESP32Time rtc;
 
@@ -90,14 +97,6 @@ void loop() {
 
   // Flash digits when setting the clock
   flashDigits();
-
-  // Since this grid was originally a 16x16 grid that was cut into three 5x16
-  // sub-grids, some of the sub-grids have different starting points and
-  // different arrangements of LEDs. The back of the grid should have a label
-  // indiciating the LED arrangement and if you need to call `flipVertical`
-  // Alternatively you can figure out which type of grid you have here:
-  // https://github.com/michellesh/rainbow-clock/wiki/LED-grid-layout
-  flipVertical();
 
   // Tell the FastLED library to show your data
   FastLED.show();

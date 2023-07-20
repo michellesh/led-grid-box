@@ -3,6 +3,12 @@
 
 struct DigitPixels {
   bool pixels[DIGIT_HEIGHT][DIGIT_WIDTH];
+  bool showPixel(int x, int y) {
+    // The LEDGrid x/y coordinates start at the bottom left, but these numbers
+    // are defined starting at the top. They are also defined by row first and
+    // then by column, rather than the standard (x, y) (col, row)
+    return pixels[DIGIT_HEIGHT - y - 1][x];
+  }
 };
 
 // clang-format off
