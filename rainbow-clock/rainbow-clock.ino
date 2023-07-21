@@ -21,13 +21,6 @@
 #define HEIGHT 5                  // number of pixels high
 #define NUM_LEDS (WIDTH * HEIGHT) // total number of pixels
 
-// Since this grid was originally a 16x16 grid that was cut into three 5x16
-// sub-grids, one of the sub-grids has a different starting point and
-// different arrangement of LEDs. The back of the grid should have a label
-// indicating the LED arrangement, or you can figure out which type of grid you
-// have here: https://github.com/michellesh/rainbow-clock/wiki/LED-grid-layout
-#define SUBGRID_TYPE 3
-
 // Clock variables
 // (The RTC library requires both time and date. Since the clock only tracks
 // time, these values don't do anything.)
@@ -55,7 +48,15 @@
 #define EDIT_TIME_FLASH_DURATION 300 // millseconds per flash when setting time
 #define COLON_FLASH_DURATION 1000    // milliseconds per colon flash
 
-LEDGrid leds(WIDTH, HEIGHT, SUBGRID_TYPE);
+// Since this grid was originally a 16x16 grid that was cut into three 5x16
+// sub-grids, each sub-grid has two possible LED arrangements. The first pixel
+// will either be on the TOP_LEFT or BOTTOM_LEFT (looking at the front of the
+// pixels). For diagrams and photos of the different arrangements go here:
+// https://github.com/michellesh/rainbow-clock/wiki/LED-grid-layout
+// Or you could just try both and see which one works! :)
+#define START_PIXEL LEDGrid::TOP_LEFT
+
+LEDGrid leds(WIDTH, HEIGHT, START_PIXEL);
 
 ESP32Time rtc;
 
