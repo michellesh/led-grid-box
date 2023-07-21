@@ -11,7 +11,7 @@
 // Internal includes
 #include "Button.h"
 #include "Clock.h"
-#include "DigitPixels.h"
+#include "Digit.h" // Pixel arrangements for the numbers 0-9
 #include "LEDGrid.h"
 
 // LED variables
@@ -82,6 +82,7 @@ void setup() {
 }
 
 void loop() {
+  // Set all LEDs to black
   FastLED.clear();
 
   // Read the button state from the pin and check for a click or a long press

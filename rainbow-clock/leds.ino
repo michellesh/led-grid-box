@@ -26,7 +26,7 @@ void setClockLEDs() {
 
 void setDigitLEDs(int digit, int startColumn) {
   // Get a 3x5 mapping of which pixels to display for this digit
-  DigitPixels d = digits[digit];
+  Digit d = digits[digit];
 
   // Loop through this 3x5 array pixels and set the LEDs
   for (int x = 0; x < DIGIT_WIDTH; x++) {
