@@ -21,10 +21,10 @@ public:
   }
 
   struct CRGB &operator()(int x, int y) {
-    return _leds[getIndex(x, y)];
+    return _leds[xyCoordsToIndex(x, y)];
   }
 
-  int getIndex(int x, int y) {
+  int xyCoordsToIndex(int x, int y) {
     // convert a x, y coordinates (row and column) to an index on the
     // one-dimensional array that snakes back and forth on the grid
     switch (_startPixel) {
