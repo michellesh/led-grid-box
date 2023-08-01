@@ -13,7 +13,7 @@
 // pixels). For diagrams and photos of the different arrangements go here:
 // https://github.com/michellesh/rainbow-clock/wiki/LED-grid-layout
 // Or you could just try both and see which one works! :)
-#define START_PIXEL LEDGrid::TOP_LEFT
+#define START_PIXEL LEDGrid::BOTTOM_LEFT
 
 LEDGrid leds(WIDTH, HEIGHT, START_PIXEL);
 
