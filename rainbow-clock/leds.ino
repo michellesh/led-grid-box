@@ -7,19 +7,17 @@
 void showClockLEDs() {
   // Set the LEDs for each individual digit, if it's not hidden (ie. if it's
   // not currently flashing in edit mode)
-
-  // Also hide the left hour digit if it's zero, ie. show 5:00 instead of 05:00
-  if (c.hourDigit1 != 0 && (c.mode != EDIT_HOUR || !c.hideDigit)) {
-    showDigitLEDs(c.hourDigit1, DIGIT_1_COLUMN);
+  if (c.isHourDigit1Visible()) {
+    showDigitLEDs(c.getHourDigit1(), DIGIT_1_COLUMN);
   }
-  if (c.mode != EDIT_HOUR || !c.hideDigit) {
-    showDigitLEDs(c.hourDigit2, DIGIT_2_COLUMN);
+  if (c.isHourDigit2Visible()) {
+    showDigitLEDs(c.getHourDigit2(), DIGIT_2_COLUMN);
   }
-  if (c.mode != EDIT_MINUTE_DIGIT_1 || !c.hideDigit) {
-    showDigitLEDs(c.minuteDigit1, DIGIT_3_COLUMN);
+  if (c.isMinuteDigit1Visible()) {
+    showDigitLEDs(c.getMinuteDigit1(), DIGIT_3_COLUMN);
   }
-  if (c.mode != EDIT_MINUTE_DIGIT_2 || !c.hideDigit) {
-    showDigitLEDs(c.minuteDigit2, DIGIT_4_COLUMN);
+  if (c.isMinuteDigit2Visible()) {
+    showDigitLEDs(c.getMinuteDigit2(), DIGIT_4_COLUMN);
   }
   showColonLEDs();
 }

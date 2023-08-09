@@ -26,7 +26,6 @@ void handleButtonState() {
       c.minute %= 60;
     }
 
-    // Tell the RTC library the newly set time
-    rtc.setTime(0, c.minute, c.hour, DAY, MONTH, YEAR);
+    c.setNewTime(c.hour, c.minute);
   }
 }

@@ -1,17 +1,16 @@
 void readEEPROM() {
-  c.hour = EEPROM.read(EEPROM_HOUR);
-  c.minute = EEPROM.read(EEPROM_MINUTE);
-  c.second = EEPROM.read(EEPROM_SECOND);
-  rtc.setTime(c.second, c.minute, c.hour, DAY, MONTH, YEAR);
+  int hour = EEPROM.read(EEPROM_HOUR);
+  int minute = EEPROM.read(EEPROM_MINUTE);
+  int second = EEPROM.read(EEPROM_SECOND);
+  c.setNewTime(hour, minute, second);
 }
 
 void updateEEPROM() {
   EVERY_N_SECONDS(1) {
     // Save values in EEPROM. Will only be commited if values have changed.
-    EEPROM.write(EEPROM_HOUR, rtc.getHour(true));
-    EEPROM.write(EEPROM_MINUTE, rtc.getMinute());
-    EEPROM.write(EEPROM_SECOND, rtc.getSecond());
+    EEPROM.write(EEPROM_HOUR, c.hour);
+    EEPROM.write(EEPROM_MINUTE, c.minute);
+    EEPROM.write(EEPROM_SECOND, c.second);
     EEPROM.commit();
-    Serial.println(rtc.getTime("%H:%M:%S"));
   }
 }
