@@ -75,6 +75,9 @@ void loop() {
   // Set the LED pixels to rainbow colored digits
   showClockLEDs();
 
+  // Set the two pixels to show the colon
+  showColonLEDs();
+
   // Tell the FastLED library to show your data
   FastLED.show();
 }

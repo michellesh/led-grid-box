@@ -19,7 +19,6 @@ void showClockLEDs() {
   if (c.isMinuteDigit2Visible()) {
     showDigitLEDs(c.getMinuteDigit2(), DIGIT_4_COLUMN);
   }
-  showColonLEDs();
 }
 
 void showDigitLEDs(int digit, int startColumn) {

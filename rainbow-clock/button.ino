@@ -1,13 +1,13 @@
 void handleButtonState() {
   // Read the value from the data pin
-  button.readState();
+  button.update();
 
-  if (button.longPressed()) {
+  if (button.longPressed) {
     // Go to next mode when button is long pressed
     c.mode = (c.mode + 1) % NUM_MODES;
   }
 
-  if (button.clicked()) {
+  if (button.clicked) {
     // Increment the digit according to which mode we're in
     if (c.mode == EDIT_HOUR) {
       c.hour++;
@@ -26,6 +26,9 @@ void handleButtonState() {
       c.minute %= 60;
     }
 
-    c.setNewTime(c.hour, c.minute);
+    // Tell the clock object that this is the new time
+    if (c.mode != SHOW_TIME) {
+      c.setNewTime(c.hour, c.minute);
+    }
   }
 }
