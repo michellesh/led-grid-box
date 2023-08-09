@@ -25,8 +25,8 @@ public:
   }
 
   int xyCoordsToIndex(int x, int y) {
-    // convert a x, y coordinates (row and column) to an index on the
-    // one-dimensional array that snakes back and forth on the grid
+    // convert x, y coordinates to an index on the one-dimensional array that
+    // snakes back and forth on the grid
     switch (_startPixel) {
     case BOTTOM_LEFT:
       if (y % 2 == 0) {

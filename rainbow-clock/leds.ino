@@ -4,27 +4,27 @@
 #define DIGIT_4_COLUMN 13 // last digit on clock starts in column 13
 #define COLON_COLUMN 8    // which column to show the colon in, either 7 or 8
 
-void setClockLEDs() {
+void showClockLEDs() {
   // Set the LEDs for each individual digit, if it's not hidden (ie. if it's
   // not currently flashing in edit mode)
 
   // Also hide the left hour digit if it's zero, ie. show 5:00 instead of 05:00
   if (c.hourDigit1 != 0 && (c.mode != EDIT_HOUR || !c.hideDigit)) {
-    setDigitLEDs(c.hourDigit1, DIGIT_1_COLUMN);
+    showDigitLEDs(c.hourDigit1, DIGIT_1_COLUMN);
   }
   if (c.mode != EDIT_HOUR || !c.hideDigit) {
-    setDigitLEDs(c.hourDigit2, DIGIT_2_COLUMN);
+    showDigitLEDs(c.hourDigit2, DIGIT_2_COLUMN);
   }
   if (c.mode != EDIT_MINUTE_DIGIT_1 || !c.hideDigit) {
-    setDigitLEDs(c.minuteDigit1, DIGIT_3_COLUMN);
+    showDigitLEDs(c.minuteDigit1, DIGIT_3_COLUMN);
   }
   if (c.mode != EDIT_MINUTE_DIGIT_2 || !c.hideDigit) {
-    setDigitLEDs(c.minuteDigit2, DIGIT_4_COLUMN);
+    showDigitLEDs(c.minuteDigit2, DIGIT_4_COLUMN);
   }
-  setColonLEDs();
+  showColonLEDs();
 }
 
-void setDigitLEDs(int digit, int startColumn) {
+void showDigitLEDs(int digit, int startColumn) {
   // Get a 3x5 mapping of which pixels to display for this digit
   Digit d = digits[digit];
 
@@ -48,7 +48,7 @@ CHSV getColor(int column) {
   return CHSV(hue, 255, BRIGHTNESS);
 }
 
-void setColonLEDs() {
+void showColonLEDs() {
   // If the colon is flashed on, set the 2 LEDs to white in the middle column,
   // rows 1 and 3
   if (!c.hideColon) {

@@ -95,7 +95,7 @@ void loop() {
   updateEEPROM();
 
   // Set the LED pixels to rainbow colored digits
-  setClockLEDs();
+  showClockLEDs();
 
   // Flash digits when setting the clock
   flashDigits();

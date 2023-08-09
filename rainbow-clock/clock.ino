@@ -19,7 +19,7 @@ void updateTime() {
 
 void flashDigits() {
   if (c.mode != SHOW_TIME) {
-    // If setting the clock, flash the digit being edited every 300ms
+    // If editing the time, flash the digit being edited every 300ms
     EVERY_N_MILLISECONDS(EDIT_TIME_FLASH_DURATION) {
       c.hideDigit = !c.hideDigit;
       c.hideColon = c.hideDigit;
