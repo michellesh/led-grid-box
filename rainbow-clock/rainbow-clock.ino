@@ -24,12 +24,6 @@
 // Button variables
 #define BUTTON_PIN 15 // pin D15 on the ESP32
 
-// EEPROM variables
-#define EEPROM_SIZE 3   // 3 variables stored in EEPROM
-#define EEPROM_HOUR 0   // Variable 0: hour
-#define EEPROM_MINUTE 1 // Variable 1: minute
-#define EEPROM_SECOND 2 // Variable 2: second
-
 // Since this grid was originally a 16x16 grid that was cut into three 5x16
 // sub-grids, each sub-grid has two possible LED arrangements. The first pixel
 // will either be on the TOP_LEFT or BOTTOM_LEFT (looking at the front of the
@@ -54,8 +48,6 @@ void setup() {
   // Tell the FastLED library which pin to read from, to use the `leds` array,
   // and how many LEDs there are
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds[0], NUM_LEDS);
-
-  EEPROM.begin(EEPROM_SIZE);
 
   // Read initial hour/minute from EEPROM
   readEEPROM();

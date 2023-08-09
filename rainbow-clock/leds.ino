@@ -49,7 +49,7 @@ CHSV getColor(int column) {
 void showColonLEDs() {
   // If the colon is flashed on, set the 2 LEDs to white in the middle column,
   // rows 1 and 3
-  if (!c.hideColon) {
+  if (c.isColonVisible()) {
     CHSV white = CHSV(0, 0, BRIGHTNESS);
     leds(COLON_COLUMN, 1) = white;
     leds(COLON_COLUMN, 3) = white;

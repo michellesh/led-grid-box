@@ -15,16 +15,24 @@
 #define EDIT_TIME_FLASH_DURATION 300 // milliseconds per flash when setting time
 #define COLON_FLASH_DURATION 1000    // milliseconds per colon flash
 
-// This class stores all clock-related data, and functions to access that data,
-// like the individual digits an whether they are visible.
+// This class stores all clock-related data, and functions to access the
+// individual digits and whether they are visible.
 class Clock {
 
 private:
   ESP32Time rtc;
 
+  // When setting the clock, the digit you're currently setting flashes on and
+  // off. `hideDigit` tracks whether the digit being edited is currently hidden
+  bool hideDigit;
+
+  // The colon always flashes every second, unless you're setting the time, it
+  // flashes along with the digit being edited
+  bool hideColon;
+
   // Convert 24-hour time to 12-hour time
-  int convert24hourTo12hour(int hour24) {
-    int hour12 = hour24 > 12 ? hour24 - 12 : hour24;
+  int get12hour(int hour24) {
+    int hour12 = hour24 % 12;
     return hour12 == 0 ? 12 : hour12;
   }
 
@@ -34,14 +42,6 @@ public:
   int hour;   // the current hour in 24-hour time
   int minute; // the current minute
   int second; // the current second
-
-  // When setting the clock, the digit you're currently setting flashes on and
-  // off. `hideDigit` tracks whether the digit being edited is currently hidden
-  bool hideDigit;
-
-  // The colon always flashes every second, unless you're setting the time, it
-  // flashes along with the digit being edited
-  bool hideColon;
 
   void updateTimeFromRTC() {
     // Update the accurate hour and minute from the RTC module
@@ -59,45 +59,57 @@ public:
     rtc.setTime(newSecond, newMinute, newHour, DAY, MONTH, YEAR);
   }
 
-  // Separate the hours and minutes into left and right digits
-  int getHourDigit1() { return convert24hourTo12hour(hour) / 10; }
+void updateDigitVisibility() {
+  // If editing the time, flash the digit being edited every 300ms
+  // The `hideDigit` boolean is toggled every 300ms even when we're not in
+  // edit mode. But it knows to only flash the digit in edit mode because
+  // the "isDigitVisible" functions below check both the mode and this
+  // `hideDigit` boolean.
+  EVERY_N_MILLISECONDS(EDIT_TIME_FLASH_DURATION) { hideDigit = !hideDigit; }
+}
 
-  int getHourDigit2() { return convert24hourTo12hour(hour) % 10; }
+void updateColonVisibility() {
+  // Flash the colon every 1 second
+  EVERY_N_MILLISECONDS(COLON_FLASH_DURATION) { hideColon = !hideColon; }
+}
 
-  int getMinuteDigit1() { return minute / 10; }
+// Separate the hours and minutes into left and right digits
+int getHourDigit1() { return get12hour(hour) / 10; }
 
-  int getMinuteDigit2() { return minute % 10; }
+int getHourDigit2() { return get12hour(hour) % 10; }
 
-  bool isHourDigit1Visible() {
-    // Also hide the left hour digit if it's zero, ie. show 5:00 instead of
-    // 05:00
-    return getHourDigit1() != 0 && (mode != EDIT_HOUR || !hideDigit);
-  }
+int getMinuteDigit1() { return minute / 10; }
 
-  // This is the same as saying: if we're not editing the hour, it's visible! If
-  // we are, and `hideDigit` is false, it's visible! Otherwise, it's not
-  bool isHourDigit2Visible() { return mode != EDIT_HOUR || !hideDigit; }
+int getMinuteDigit2() { return minute % 10; }
 
-  bool isMinuteDigit1Visible() {
-    return mode != EDIT_MINUTE_DIGIT_1 || !hideDigit;
-  }
+bool isHourDigit1Visible() {
+  // Also hide the left hour digit if it's zero, ie. show 5:00 instead of
+  // 05:00
+  return getHourDigit1() != 0 && (mode != EDIT_HOUR || !hideDigit);
+}
 
-  bool isMinuteDigit2Visible() {
-    return mode != EDIT_MINUTE_DIGIT_2 || !hideDigit;
-  }
+// This is the same as saying: if we're not editing the hour, return true
+// (it's visible). If we are, and `hideDigit` is false, return true.
+// Otherwise, return false.
+bool isHourDigit2Visible() { return mode != EDIT_HOUR || !hideDigit; }
 
-  void updateDigitVisibility() {
-    // If editing the time, flash the digit being edited every 300ms
-    EVERY_N_MILLISECONDS(EDIT_TIME_FLASH_DURATION) { hideDigit = !hideDigit; }
-  }
+bool isMinuteDigit1Visible() {
+  return mode != EDIT_MINUTE_DIGIT_1 || !hideDigit;
+}
 
-  void updateColonVisibility() {
-    // If in SHOW_TIME mode, flash the colon every second. If editing the time,
-    // flash the colon along with the digit being edited
-    if (mode == SHOW_TIME) {
-      EVERY_N_MILLISECONDS(COLON_FLASH_DURATION) { hideColon = !hideColon; }
-    } else {
-      hideColon = hideDigit;
-    }
-  }
+bool isMinuteDigit2Visible() {
+  return mode != EDIT_MINUTE_DIGIT_2 || !hideDigit;
+}
+
+bool isColonVisible() {
+  // The colon flashes at different speeds depending on the mode. When editing
+  // the clock, the colon flash aligns with the digit flash. Otherwise, it
+  // flashes slower.
+  return mode == SHOW_TIME ? !hideColon : !hideDigit;
+}
+
+
+
+
+
 };
