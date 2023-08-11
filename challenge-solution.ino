@@ -1,3 +1,5 @@
+// Challenge solution from: https://github.com/michellesh/rainbow-clock/wiki/Code-simple-LED-grid-patterns#challenge
+
 // Left LEDs
 leds(0, 0) = CRGB::Red;
 leds(0, 4) = CRGB::Red;
